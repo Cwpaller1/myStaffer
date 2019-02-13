@@ -23,8 +23,8 @@ class MainWindow:
         # create second cascade
         self.second_cascade = Menu(self.menu_bar)
         self.menu_bar.add_cascade(label='Functions', menu=self.second_cascade)
-        self.second_cascade.add_command(label='Sort First Sheet by Subsequent Sheets', command=print('Sorted'))
-        self.second_cascade.add_command(label='Add People into Database', command=print('Added People'))
+        self.second_cascade.add_command(label='Sort First Sheet by Subsequent Sheets')
+        self.second_cascade.add_command(label='Add People into Database')
 
         self.file_label = Label(master, text='Enter file name: ')
         self.file_entry = Entry(master)
