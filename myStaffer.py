@@ -7,14 +7,17 @@ Created by Cory Paller.'''
 import openpyxl
 from tkinter import *
 from tkinter import ttk
+from tkinter import filedialog
 import os
 
 file_name = ''
+
 
 # create object that inherits from Tk
 class myStafferapp(Tk):
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
+        Tk.wm_title(self, 'myStaffer Program')
         container = Frame(self)
         # create cascading toolbar at the top
         menu_bar = Menu(self)
@@ -71,9 +74,38 @@ class ChooseFile(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         # create a label, an entry and a button.
-        Label(self, text="Which file do you want to use?: ").grid(row=0, column=0)
-        ttk.Entry(self).grid(row=0, column=1)
-        ttk.Button(self, text='Submit', command=lambda:controller.show_frame(StartPage)).grid(row=0, column=2)
+        ttk.Button(self, text="Choose File", command=lambda:self.open_dialog_box(controller)).grid(row=0, column=0,\
+                                                                                                   padx=5, pady=10)
+        ttk.Label(self, text='File name: ').grid(row=0, column=1)
+
+    def open_dialog_box(self, controller):
+        file_name = (filedialog.askopenfilename())
+        ttk.Label(self, text=file_name).grid(row=0, column=2)
+        ttk.Button(self, text="Import File Contents", command=import_file).grid(row=1, columnspan=2, pady = 10)
+        ttk.Button(self, text="Cancel", command=lambda: controller.show_frame(StartPage)).grid(row=1, column=2)
+
+
+def import_file():
+    list_of_people = []
+    file1 = openpyxl.load_workbook(file_name)
+    for row in file1.active.rows:
+        new_person = Person(row)
+        list_of_people.append(new_person)
+    print(list_of_people)
+
+
+class Person(object):
+    def __init__(self, row):
+        self.first = row[0]
+        self.last = row[1]
+        self.address = row[2]
+        self.city = row[3]
+        self.state = row[4]
+        self.zip_code = row[5]
+        self.cell = row[6]
+        self.home = row[7]
+        self.work = row[8]
+        self.email = row[9]
 
 
 # function that takes in an Excel file and reads the data into a dictionary.
