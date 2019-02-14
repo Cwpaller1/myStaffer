@@ -6,40 +6,74 @@ Created by Cory Paller.'''
 
 import openpyxl
 from tkinter import *
+from tkinter import ttk
 import os
 
 file_name = ''
 
-class MainWindow:
-    def __init__(self, master):
-        self.menu_bar = Menu(master)
-        master.config(menu=self.menu_bar)
+# create object that inherits from Tk
+class myStafferapp(Tk):
+    def __init__(self, *args, **kwargs):
+        Tk.__init__(self, *args, **kwargs)
+        container = Frame(self)
+        # create cascading toolbar at the top
+        menu_bar = Menu(self)
+        self.config(menu=menu_bar)
 
         # create first cascade
-        self.first_cascade = Menu(self.menu_bar)
-        self.menu_bar.add_cascade(label='File', menu=self.first_cascade)
-        self.first_cascade.add_command(label='Choose Excel File...', command=self.choose_file)
+        first_cascade = Menu(menu_bar)
+        menu_bar.add_cascade(label='File', menu=first_cascade)
+        first_cascade.add_command(label='Choose Excel File...', command=self.choose_Excel_File)
 
         # create second cascade
-        self.second_cascade = Menu(self.menu_bar)
-        self.menu_bar.add_cascade(label='Functions', menu=self.second_cascade)
-        self.second_cascade.add_command(label='Sort First Sheet by Subsequent Sheets')
-        self.second_cascade.add_command(label='Add People into Database')
+        second_cascade = Menu(menu_bar)
+        menu_bar.add_cascade(label='Functions', menu=second_cascade)
+        second_cascade.add_command(label='Sort First Sheet by Subsequent Sheets')
+        second_cascade.add_command(label='Add People into Database')
 
-        self.file_label = Label(master, text='Enter file name: ')
-        self.file_entry = Entry(master)
-        self.file_button = Button(text='Submit', command=self.commit_file)
+        # pack container into Tk
+        container.pack()
 
-    def choose_file(self):
-        self.file_label.grid(row=0, column=0)
-        self.file_entry.grid(row=0, column=1)
-        self.file_button.grid(row=0, column=2)
+        # create dictionary that hold our frames
+        self.Frames = {}
 
-    def commit_file(self):
-        print(os.getcwd())
-        file_name = str(self.file_entry.get())
-        print(file_name)
-        open_xl_file()
+        for F in (StartPage, ChooseFile):
+            # create StartPage frame
+            frame = F(container, self)
+            # add our new frame into the dictionary of frames
+            self.Frames[str(F)] = frame
+            # pack frame
+            frame.grid(row=0, column=0, sticky='nsew')
+
+        self.show_frame(StartPage)
+
+    # create method that will show the frame we want
+    def show_frame(self, controller):
+        frame = self.Frames[str(controller)]
+        # raise frame to front using built in Tk method
+        frame.tkraise()
+
+    def choose_Excel_File(self):
+        self.show_frame(ChooseFile)
+
+
+# create StartPage for the program, inheriting from Frame
+class StartPage(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        # add a widget that welcomes the user.
+        label = Label(self, text="Welcome to myStaffer").pack(side=TOP, fill=X)
+        ttk.Button(self, text="Upload New File", command=controller.choose_Excel_File).pack(side=TOP)
+
+
+# create ChooseFile frame for the program, inheriting from Frame
+class ChooseFile(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        # create a label, an entry and a button.
+        Label(self, text="Which file do you want to use?: ").grid(row=0, column=0)
+        ttk.Entry(self).grid(row=0, column=1)
+        ttk.Button(self, text='Submit', command=lambda:controller.show_frame(StartPage)).grid(row=0, column=2)
 
 
 # function that takes in an Excel file and reads the data into a dictionary.
@@ -186,6 +220,7 @@ def go_through_list(sheet_to_go_through, last_name, first_name, row_to_append,\
 def main():
     open_xl_file()
 
-root = Tk()
-MainWindow(root)
-root.mainloop()
+
+myStaffer = myStafferapp()
+myStaffer.title = 'myStaffer'
+myStaffer.mainloop()
