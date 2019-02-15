@@ -79,15 +79,18 @@ class ChooseFile(Frame):
         ttk.Label(self, text='File name: ').grid(row=0, column=1)
 
     def open_dialog_box(self, controller):
-        file_name = (filedialog.askopenfilename())
+        file_name = filedialog.askopenfilename()
+        print (file_name)
+        print (os.getcwd())
         ttk.Label(self, text=file_name).grid(row=0, column=2)
-        ttk.Button(self, text="Import File Contents", command=import_file).grid(row=1, columnspan=2, pady = 10)
+        ttk.Button(self, text="Import File Contents", command=lambda:import_file(file_name)).grid(row=1, columnspan=2, pady = 10)
         ttk.Button(self, text="Cancel", command=lambda: controller.show_frame(StartPage)).grid(row=1, column=2)
 
 
-def import_file():
+def import_file(file_path):
     list_of_people = []
-    file1 = openpyxl.load_workbook(file_name)
+    print(file_name)
+    file1 = openpyxl.load_workbook(file_name, 'r')
     for row in file1.active.rows:
         new_person = Person(row)
         list_of_people.append(new_person)
