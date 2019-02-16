@@ -4,11 +4,10 @@ Created by Cory Paller.'''
 # shebang line
 #! usr/bin/env Python3.
 
-import openpyxl
+from openpyxl import *
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
-import os
 import shelve
 
 # global variables and import shelve data
@@ -51,7 +50,6 @@ class MyStafferApp(Tk):
         self.config(menu=menu_bar)
 
         # create General cascade
-        # create second cascade
         general_cascade = Menu(menu_bar)
         menu_bar.add_cascade(label='General', menu=general_cascade)
         general_cascade.add_command(label='Back to Home Page', command=lambda: self.show_frame(StartPage))
@@ -266,6 +264,7 @@ class SearchPage(ttk.Frame):
             new_button.grid(row=row_num, column=0)
             row_num += 1
 
+
 class AddNewPerson(ttk.Frame):
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)
@@ -320,6 +319,7 @@ class AddNewPerson(ttk.Frame):
         master_frame.grid(row=0, column=0)
         master_frame.grid_rowconfigure(0, weight=1)
         master_frame.grid_columnconfigure(0, weight=1)
+        
 
     def submit_person_to_database(self):
         global list_of_people
@@ -356,12 +356,11 @@ class AddNewPerson(ttk.Frame):
 # function that takes a file and creates Person objects out of each row and appends them to the list of people.
 def import_file():
     global list_of_people
-    file1 = openpyxl.load_workbook(file_name)
+    file1 = load_workbook(file_name)
     for row in file1.active.rows:
         new_person = Person()
         new_person.take_via_excel(row)
         list_of_people.append(new_person)
-    print_list_of_people(list_of_people)
 
 
 # function that searches list of people and returns a person
@@ -420,10 +419,14 @@ class Person(object):
         self.address = row[2].value
         self.city = row[3].value
         self.state = row[4].value
-        self.zip_code = row[5].value
-        self.cell = row[6].value
-        self.home = row[7].value
-        self.work = row[8].value
+        self.zip_code = str(row[5].value)
+        self.zip_code = self.zip_code[0:5]
+        self.cell = str(row[6].value)
+        self.cell = self.cell[0:10]
+        self.home = str(row[7].value)
+        self.home = self.home[0:10]
+        self.work = str(row[8].value)
+        self.work = self.work[0:10]
         self.email = row[9].value
 
     # function for when you make Person object via New Person Page
