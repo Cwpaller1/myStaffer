@@ -4,17 +4,22 @@ Created by Cory Paller.'''
 # shebang line
 #! usr/bin/env Python3.
 
-from openpyxl import *
-from tkinter import *
-from tkinter import ttk
-from tkinter import filedialog
-import shelve
+from openpyxl import *              # for excel files
+from tkinter import *               # for Gui
+from tkinter import ttk             # for modern Gui widgets
+from tkinter import filedialog      # for file chooser
+import shelve                       # to save our database
+import re                           # for regular expressions
 
 # global variables and import shelve data
-
 file_name = ''
 list_of_people = []
 search_results = []
+edit_person = []
+
+
+'''Main Tk Window
+'''
 
 
 # create object that inherits from Tk
@@ -24,6 +29,9 @@ class MyStafferApp(Tk):
         Tk.wm_title(self, 'myStaffer Program')
         container = ttk.Frame(self)
 
+        global edit_person
+        edit_person.append(Person())
+
         # pack container into Tk
         container.pack(side='top', fill=BOTH, expand=TRUE)
         container.grid_columnconfigure(0, weight=1)
@@ -32,13 +40,13 @@ class MyStafferApp(Tk):
         # create dictionary that hold our frames
         self.Frames = {}
 
-        for F in (StartPage, ChooseFile, Staffer, Candidate, SearchPage, AddNewPerson):
+        for F in (StartPage, ChooseFile, Staffer, Candidate, SearchPage, AddNewPerson, EditPage):
             # create page
             frame = F(container, self)
             # add our new frame into the dictionary of frames
             self.Frames[str(F)] = frame
-            # grid the frame
 
+            # grid the frame
             frame.grid(row=0, column=0, sticky='nsew')
             frame.grid_rowconfigure(0, weight=1)
             frame.grid_columnconfigure(0, weight=1)
@@ -84,6 +92,10 @@ class MyStafferApp(Tk):
         frame.tkraise()
 
 
+'''Window Pages
+'''
+
+
 # create StartPage for the program, inheriting from Frame
 class StartPage(ttk.Frame):
     def __init__(self, parent, controller):
@@ -91,7 +103,7 @@ class StartPage(ttk.Frame):
         # add a widget that welcomes the user.
         frame1 = ttk.Frame(self)
         ttk.Label(frame1, text="Welcome to myStaffer").grid(sticky='ew')
-        ttk.Button(frame1, text="Candidate", command= lambda: controller.show_frame(Candidate)).grid(row=1,
+        ttk.Button(frame1, text="Candidate", command=lambda: controller.show_frame(Candidate)).grid(row=1,
                                                                                                      sticky='ew')
         ttk.Button(frame1, text="Staffer", command=lambda: controller.show_frame(Staffer)).grid(row=2, sticky='ew')
         ttk.Button(frame1, text="Upload New File", command=lambda: controller.show_frame(ChooseFile)).\
@@ -153,12 +165,12 @@ class ChooseFile(ttk.Frame):
             grid(row=1, column=2)
 
 
+# create SearchPage
 class SearchPage(ttk.Frame):
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)
 
-        master_frame = ttk.Frame(self)
-        # define my StringVariables
+        # define my StringVariables and page variables
         self.first_strvar = StringVar()
         self.last_strvar = StringVar()
         self.address_strvar = StringVar()
@@ -170,6 +182,12 @@ class SearchPage(ttk.Frame):
         self.home_strvar = StringVar()
         self.email_strvar = StringVar()
 
+        self.search_dict = []
+        self.button_list = []
+
+        # create master frame
+        master_frame = ttk.Frame(self)
+
         # create frame for user input
         frame1 = ttk.Frame(master_frame)
         ttk.Label(frame1, text="Search for a Person").grid(row=0, column=0, columnspan=2, pady=5)
@@ -178,15 +196,15 @@ class SearchPage(ttk.Frame):
         ttk.Label(frame1, text="Address: ").grid(row=4, column=0, sticky='w')
         ttk.Label(frame1, text="Phone: ").grid(row=5, column=0, sticky='w')
         ttk.Label(frame1, text="Email: ").grid(row=6, column=0, sticky='w')
-        self.first_entry = ttk.Entry(frame1, width=10)
+        self.first_entry = ttk.Entry(frame1, width=15)
         self.first_entry.grid(row=2, column=1, sticky='e')
-        self.last_entry = ttk.Entry(frame1, width=10)
+        self.last_entry = ttk.Entry(frame1, width=15)
         self.last_entry.grid(row=3, column=1, sticky='e')
-        self.address_entry = ttk.Entry(frame1, width=10)
+        self.address_entry = ttk.Entry(frame1, width=15)
         self.address_entry.grid(row=4, column=1, sticky='e')
-        self.phone_entry = ttk.Entry(frame1, width=10)
+        self.phone_entry = ttk.Entry(frame1, width=15)
         self.phone_entry.grid(row=5, column=1, sticky='e')
-        self.email_entry = ttk.Entry(frame1, width=10)
+        self.email_entry = ttk.Entry(frame1, width=15)
         self.email_entry.grid(row=6, column=1, sticky='e')
         ttk.Button(frame1, text="Search...", command=self.submit_search).grid(row=8, column=0,
                                                                               columnspan=2, sticky='ew')
@@ -211,25 +229,25 @@ class SearchPage(ttk.Frame):
         ttk.Label(self.frame3, text='Home: ').grid(row=9, column=0, sticky='w')
         ttk.Label(self.frame3, text='Email: ').grid(row=10, column=0, sticky='w')
         # blank labels to be set later
-        self.first_label = ttk.Label(self.frame3, textvariable=self.first_strvar, width=15)\
+        self.first_label = ttk.Label(self.frame3, textvariable=self.first_strvar, width=25)\
             .grid(row=1, column=1, sticky='e')
-        self.last_label = ttk.Label(self.frame3, textvariable=self.last_strvar, width=15)\
+        self.last_label = ttk.Label(self.frame3, textvariable=self.last_strvar, width=25)\
             .grid(row=2, column=1, sticky='e')
-        self.address_label = ttk.Label(self.frame3, textvariable=self.address_strvar, width=15)\
+        self.address_label = ttk.Label(self.frame3, textvariable=self.address_strvar, width=25)\
             .grid(row=3, column=1, sticky='e')
-        self.city_label = ttk.Label(self.frame3, textvariable=self.city_strvar, width=15)\
+        self.city_label = ttk.Label(self.frame3, textvariable=self.city_strvar, width=25)\
             .grid(row=4, column=1, sticky='e')
-        self.state_label = ttk.Label(self.frame3, textvariable=self.state_strvar, width=15)\
+        self.state_label = ttk.Label(self.frame3, textvariable=self.state_strvar, width=25)\
             .grid(row=5, column=1, sticky='e')
-        self.zip_code_label = ttk.Label(self.frame3, textvariable=self.zip_strvar, width=15)\
+        self.zip_code_label = ttk.Label(self.frame3, textvariable=self.zip_strvar, width=25)\
             .grid(row=6, column=1, sticky='e')
-        self.cell_label = ttk.Label(self.frame3, textvariable=self.cell_strvar, width=15).\
+        self.cell_label = ttk.Label(self.frame3, textvariable=self.cell_strvar, width=25).\
             grid(row=7, column=1, sticky='e')
-        self.work_label = ttk.Label(self.frame3, textvariable=self.work_strvar, width=15)\
+        self.work_label = ttk.Label(self.frame3, textvariable=self.work_strvar, width=25)\
             .grid(row=8, column=1, sticky='e')
-        self.home_label = ttk.Label(self.frame3, textvariable=self.home_strvar, width=15)\
+        self.home_label = ttk.Label(self.frame3, textvariable=self.home_strvar, width=25)\
             .grid(row=9, column=1, sticky='e')
-        self.email_label = ttk.Label(self.frame3, textvariable=self.email_strvar, width=15)\
+        self.email_label = ttk.Label(self.frame3, textvariable=self.email_strvar, width=25)\
             .grid(row=10, column=1, sticky='e')
         self.frame3.grid(row=0, column=2, sticky='n')
 
@@ -239,30 +257,72 @@ class SearchPage(ttk.Frame):
         frame4.grid(row=1, column=0, sticky='ew', columnspan=4, pady=50)
         frame4.grid_columnconfigure(0, weight=1)
 
-        # create dictionary to hold entry edits
-        self.search_dict = {}
+        # add status bar
+        self.status = StringVar()
+        status_frame = StatusBar(self)
+        status_frame.grid(row=1, column=0, sticky='nsew')
+        status_frame.grid_columnconfigure(0, weight=1)
 
-        master_frame.grid(row=0, column=0, sticky='ew', padx= 20)
+        master_frame.grid(row=0, column=0, padx=50, sticky='ew')
         master_frame.grid_rowconfigure(0, weight=1)
-        master_frame.grid_columnconfigure(0, weight=1)
         master_frame.grid_columnconfigure(1, weight=1)
 
     def submit_search(self):
+        self.search_dict = []
         # assign entry edits to keys and place in dictionary
-        self.search_dict['first'] = self.first_entry.get()
-        self.search_dict['last'] = self.last_entry.get()
-        self.search_dict['address'] = self.address_entry.get()
-        self.search_dict['phone'] = self.phone_entry.get()
-        self.search_dict['email'] = self.email_entry.get()
+        self.search_dict.append(self.first_entry.get().lower())
+        self.search_dict.append(self.last_entry.get().lower())
+        self.search_dict.append(self.address_entry.get().lower())
+        self.search_dict.append(self.phone_entry.get().lower())
+        self.search_dict.append(self.email_entry.get().lower())
 
-        # pass dictionary to search_list function
-        search_list(self.search_dict)
-        # display results
-        row_num = 1
-        for x in search_results:
-            new_button = ResultButton(self.frame2, x, self)
-            new_button.grid(row=row_num, column=0)
-            row_num += 1
+        if self.search_dict[0] == '' and self.search_dict[1] == '' and self.search_dict[2] == '' and \
+                self.search_dict[3] == '' and self.search_dict[4] == '':
+            self.status.set('Error. Search fields are empty.')
+        else:
+            self.delete_search_data()
+
+            # pass dictionary to search_list function
+            search_list(self.search_dict)
+            # display results
+            row_num = 1
+            for x in search_results:
+                new_button = ResultButton(self.frame2, x, self)
+                new_button.grid(row=row_num, column=0, sticky='ew')
+                self.button_list.append(new_button)
+                row_num += 1
+            if len(search_results) > 0:
+                self.status.set('Success. We found something!')
+            else:
+                self.status.set('We searched and searched...but nothing.')
+
+    def delete_search_data(self):
+        # clear search results
+        global search_results
+        search_results = []
+
+        # clear entries
+        self.first_entry.delete(0, END)
+        self.last_entry.delete(0, END)
+        self.address_entry.delete(0, END)
+        self.phone_entry.delete(0, END)
+        self.email_entry.delete(0, END)
+
+        # clear smart variables
+        self.first_strvar.set('')
+        self.last_strvar.set('')
+        self.address_strvar.set('')
+        self.city_strvar.set('')
+        self.state_strvar.set('')
+        self.zip_strvar.set('')
+        self.cell_strvar.set('')
+        self.work_strvar.set('')
+        self.home_strvar.set('')
+        self.email_strvar.set('')
+
+        # delete all of the buttons
+        for x in self.button_list:
+            x.destroy()
 
 
 class AddNewPerson(ttk.Frame):
@@ -274,7 +334,8 @@ class AddNewPerson(ttk.Frame):
         # title frame
         frame1 = ttk.Frame(master_frame)
         ttk.Label(frame1, text="Add New Person to Database").grid(sticky='ew', pady=15)
-        frame1.grid(row=0, column=0, sticky='ew')
+        frame1.grid(row=0, column=0, columnspan=2)
+        frame1.grid_rowconfigure(0, weight=1)
 
         # body frame
         frame2 = ttk.Frame(master_frame)
@@ -315,15 +376,32 @@ class AddNewPerson(ttk.Frame):
         self.submit_button.grid(row=11, column=0, columnspan=2, sticky='ew')
         # pack body frame
         frame2.grid(row=1, column=0)
+        frame2.grid_columnconfigure(0, weight=1)
+        frame2.grid_rowconfigure(1, weight=1)
+
+        self.status = StringVar()
+        status_frame = StatusBar(self)
+        status_frame.grid(row=1, column=0, sticky='nsew')
+        status_frame.grid_columnconfigure(0, weight=1)
 
         master_frame.grid(row=0, column=0)
         master_frame.grid_rowconfigure(0, weight=1)
         master_frame.grid_columnconfigure(0, weight=1)
-        
 
-    def submit_person_to_database(self):
-        global list_of_people
-        new_person_list = {
+        # create list for entries
+        self.new_person_list = {}
+
+    def check_fields(self):
+        # call create_person_list to set entries to self.new_person_list
+        self.create_person_list()
+
+        if self.new_person_list['first'] is '' or self.new_person_list['last'] is '':
+            return False
+        else:
+            return True
+
+    def create_person_list(self):
+        self.new_person_list = {
             'first': self.first_entry.get(),
             'last': self.last_entry.get(),
             'address': self.address_entry.get(),
@@ -334,23 +412,100 @@ class AddNewPerson(ttk.Frame):
             'home': self.home_entry.get(),
             'work': self.work_entry.get(),
             'email': self.email_entry.get(),
-            }
+        }
 
-        new_person = Person()
-        new_person.take_via_new_person(new_person_list)
-        list_of_people.append(new_person)
+    def submit_person_to_database(self):
+        global list_of_people
 
-        # clear the entries
-        self.first_entry.delete(0, 'end')
-        self.last_entry.delete(0, 'end')
-        self.address_entry.delete(0, 'end')
-        self.city_entry.delete(0, 'end')
-        self.state_entry.delete(0, 'end')
-        self.zip_code_entry.delete(0, 'end')
-        self.cell_entry.delete(0, 'end')
-        self.home_entry.delete(0, 'end')
-        self.work_entry.delete(0, 'end')
-        self.email_entry.delete(0, 'end')
+        # check fields
+        if self.check_fields() is True:
+            new_person = Person()
+            new_person.take_via_new_person(self.new_person_list)
+            list_of_people.append(new_person)
+
+            # clear the entries
+            self.first_entry.delete(0, 'end')
+            self.last_entry.delete(0, 'end')
+            self.address_entry.delete(0, 'end')
+            self.city_entry.delete(0, 'end')
+            self.state_entry.delete(0, 'end')
+            self.zip_code_entry.delete(0, 'end')
+            self.cell_entry.delete(0, 'end')
+            self.home_entry.delete(0, 'end')
+            self.work_entry.delete(0, 'end')
+            self.email_entry.delete(0, 'end')
+            self.status.set('Success. New Person was added to database.')
+
+        else:
+            self.status.set('Error. Missing First or Last Name. Try again.')
+
+
+class EditPage(ttk.Frame):
+    def __init__(self, parent, controller):
+        ttk.Frame.__init__(self, parent)
+
+        # master frame for page
+        master_frame = ttk.Frame(self)
+
+        # title frame
+        frame1 = ttk.Frame(master_frame)
+        ttk.Label(frame1, text="Edit Person").grid(sticky='ew', pady=15)
+        frame1.grid(row=0, column=0, columnspan=2)
+        frame1.grid_rowconfigure(0, weight=1)
+
+        # body frame
+        frame2 = ttk.Frame(master_frame)
+        # header labels
+        ttk.Label(frame2, text='First: ').grid(row=1, column=0, sticky='w')
+        ttk.Label(frame2, text='Last: ').grid(row=2, column=0, sticky='w')
+        ttk.Label(frame2, text='Address: ').grid(row=3, column=0, sticky='w')
+        ttk.Label(frame2, text='City: ').grid(row=4, column=0, sticky='w')
+        ttk.Label(frame2, text='State: ').grid(row=5, column=0, sticky='w')
+        ttk.Label(frame2, text='Zip Code: ').grid(row=6, column=0, sticky='w')
+        ttk.Label(frame2, text='Cell: ').grid(row=7, column=0, sticky='w')
+        ttk.Label(frame2, text='Home: ').grid(row=8, column=0, sticky='w')
+        ttk.Label(frame2, text='Work: ').grid(row=9, column=0, sticky='w')
+        ttk.Label(frame2, text='Email: ').grid(row=10, column=0, sticky='w')
+        # user entry
+        self.first_entry = ttk.Entry(frame2, text=edit_person[0].first)
+        self.first_entry.grid(row=1, column=1, sticky='e')
+        self.last_entry = ttk.Entry(frame2, text=edit_person[0].last)
+        self.last_entry.grid(row=2, column=1, sticky='e')
+        self.address_entry = ttk.Entry(frame2, text=edit_person[0].address)
+        self.address_entry.grid(row=3, column=1, sticky='e')
+        self.city_entry = ttk.Entry(frame2, text=edit_person[0].city)
+        self.city_entry.grid(row=4, column=1, sticky='e')
+        self.state_entry = ttk.Entry(frame2, text=edit_person[0].state)
+        self.state_entry.grid(row=5, column=1, sticky='e')
+        self.zip_code_entry = ttk.Entry(frame2, text=edit_person[0].zip_code)
+        self.zip_code_entry.grid(row=6, column=1, sticky='e')
+        self.cell_entry = ttk.Entry(frame2, text=edit_person[0].cell)
+        self.cell_entry.grid(row=7, column=1, sticky='e')
+        self.home_entry = ttk.Entry(frame2, text=edit_person[0].home)
+        self.home_entry.grid(row=8, column=1, sticky='e')
+        self.work_entry = ttk.Entry(frame2, text=edit_person[0].work)
+        self.work_entry.grid(row=9, column=1, sticky='e')
+        self.email_entry = ttk.Entry(frame2, text=edit_person[0].email)
+        self.email_entry.grid(row=10, column=1, sticky='e')
+        # submit button
+        self.submit_button = ttk.Button(frame2, text='Submit Edits')
+        self.submit_button.grid(row=11, column=0, columnspan=2, sticky='ew')
+        # pack body frame
+        frame2.grid(row=1, column=0)
+        frame2.grid_columnconfigure(0, weight=1)
+        frame2.grid_rowconfigure(1, weight=1)
+
+        self.status = StringVar()
+        status_frame = StatusBar(self)
+        status_frame.grid(row=1, column=0, sticky='nsew')
+        status_frame.grid_columnconfigure(0, weight=1)
+
+        master_frame.grid(row=0, column=0)
+        master_frame.grid_rowconfigure(0, weight=1)
+        master_frame.grid_columnconfigure(0, weight=1)
+
+'''Global Functions
+'''
 
 
 # function that takes a file and creates Person objects out of each row and appends them to the list of people.
@@ -365,37 +520,24 @@ def import_file():
 
 # function that searches list of people and returns a person
 def search_list(person_to_find):
-    global list_of_people
     global search_results
 
     # flip through the tuples in person_to_find looking for a match
-    for x in person_to_find:
-        # check for first name match
-        if x == 'first':
-            # flip through tuples in list_of_people to find match
-            for y in list_of_people:
-                if person_to_find.get(x) == y.first:
-                    search_results.append(y)
-        # check for last name match
-        elif x == 'last':
-            for y in list_of_people:
-                if person_to_find.get(x) == y.last:
-                    search_results.append(y)
-        # check for address match
-        elif x == 'address':
-            for y in list_of_people:
-                if person_to_find.get(x) == y.address:
-                    search_results.append(y)
-        # check for phone match
-        elif x == 'phone':
-            for y in list_of_people:
-                if person_to_find.get(x) == y.cell or x == y.home or x == y.work:
-                    search_results.append(y)
-        # check for email match
-        elif x == 'email':
-            for y in list_of_people:
-                if person_to_find.get(x) == y.email:
-                    search_results.append(y)
+    for x in list_of_people:
+        if person_to_find[0] in x.first.lower() or person_to_find[0] == '':
+            if person_to_find[1] in x.last.lower() or person_to_find[1] == '':
+                if person_to_find[2] in x.address.lower() or person_to_find[2] == '':
+                    if person_to_find[3] in x.cell or person_to_find[3] in x.home or person_to_find[3] in x.work or \
+                            person_to_find[3] == '':
+                        if person_to_find[4] in x.email or person_to_find[4] == '':
+                            search_results.append(x)
+
+
+# function that saves data onto a Shelve file when the program closes.
+
+
+'''Objects
+'''
 
 
 # Class that creates a Person object
@@ -411,6 +553,7 @@ class Person(object):
         self.work = ''
         self.home = ''
         self.email = ''
+        self.notes = ''
 
     # function for when you make Person objects via Excel import
     def take_via_excel(self, row):
@@ -444,9 +587,9 @@ class Person(object):
 
 
 # creates a button for each result
-class ResultButton(Button):
+class ResultButton(ttk.Button):
     def __init__(self, parent, person, controller):
-        Button.__init__(self, parent)
+        ttk.Button.__init__(self, parent)
         self.controller = controller
         self.person = person
         self.config(text=(person.last + ', ' + person.first), command=self.display_page)
@@ -462,6 +605,21 @@ class ResultButton(Button):
         self.controller.work_strvar.set(self.person.work)
         self.controller.home_strvar.set(self.person.home)
         self.controller.email_strvar.set(self.person.email)
+        self.controller.edit_button = ttk.Button(self.controller.frame3, text='Edit', command=self.edit_button)
+        self.controller.edit_button.grid(row=11, column=0, rowspan=2, sticky='ew')
+
+    def edit_button(self):
+        global edit_person
+        edit_person.append(self.person)
+        self.controller.self.controller.showframe(EditPage)
+        self.controller.edit_button.destroy()
+
+
+class StatusBar(ttk.Frame):
+    def __init__(self, parent):
+        ttk.Frame.__init__(self, parent)
+        self.config(relief=SUNKEN, borderwidth=3)
+        self.label1 = ttk.Label(self, textvariable=parent.status).pack(side='left')
 
 
 def quit_save():
@@ -472,149 +630,7 @@ def quit_save():
 
 
 myStaffer = MyStafferApp()
-myStaffer.geometry('800x600')
+myStaffer.geometry('900x600')
 myStaffer.title = 'myStaffer'
 myStaffer.protocol("WM_DELETE_WINDOW", quit_save)
 myStaffer.mainloop()
-
-
-'''
-# function that takes in an Excel file and reads the data into a dictionary.
-def open_xl_file():
-    file1 = openpyxl.load_workbook(str(os.getcwd() + '/' + file_name))
-    co_executive = file1['County_Exec_500']
-    pros = file1['Prosecutor_250']
-    galloway = file1['Galloway_250']
-    zimmerman = file1['Zimmerman_100']
-    schupp = file1['Schupp_250']
-    sifton = file1['Sifton_250']
-    adams_williams = file1['AdamsWilliams_100']
-    council = file1['Council_100']
-    state_rep = file1['StateRep_100']
-    wam = file1['WAM_100']
-    final_result = file1['FinalResult']
-
-    flip_through(co_executive, pros, galloway, zimmerman, final_result, schupp,\
-                 sifton, adams_williams, council, state_rep, wam, file1)
-    
-# function to handle the flipping through
-def flip_through(co_executive, pros, galloway, zimmerman, final_result, schupp,\
-                 sifton, adams_williams, council, state_rep, wam, file1):
-    first_name = ''
-    last_name = ''
-    find_match = False
-    zim_match = False
-    row_to_append = []
-    
-    # cycle through County Exec
-    for row_num_1 in co_executive.rows:
-
-        # make sure we don't repeat:
-        if first_name == row_num_1[6].value and \
-           last_name == row_num_1[5].value and \
-           find_match == True:
-            for cell in row_num_1:
-                row_to_append.append(cell.value)
-            copy_to_final(row_to_append, final_result)
-            row_to_append = []
-            print("Copied duplicate Stenger/Mantovani")
-            continue
-
-        find_match = False
-        zim_match = False
-        first_name = row_num_1[6].value
-        last_name = row_num_1[5].value
-
-        # cycle through Zimmerman
-        for row_num_2 in zimmerman.rows:
-            if row_num_2[5].value == last_name and \
-               row_num_2[6].value == first_name:
-                zim_match = True
-            
-        # check to see if Zim kicked it
-        if zim_match == False:
-            # cycle through Prosecutor
-            for row_num_3 in pros.rows:
-                if row_num_3[5].value == last_name and \
-                   row_num_3[6].value == first_name:
-                    for cell in row_num_3:
-                        row_to_append.append(cell.value)
-                    copy_to_final(row_to_append, final_result)
-                    row_to_append = []
-                    find_match = True
-
-            # cycle through Galloway
-            for row_num_4 in galloway.rows:
-                if row_num_4[5].value == last_name and \
-                   row_num_4[6].value == first_name:
-                    for cell in row_num_4:
-                        row_to_append.append(cell.value)
-                    copy_to_final(row_to_append, final_result)
-                    row_to_append = []
-                    find_match = True
-
-            # cycle through Schupp
-            find_match = go_through_list(schupp, last_name,\
-                                         first_name, row_to_append,\
-                                         final_result, find_match)
-
-            # cycle through Sifton
-            find_match = go_through_list(sifton, last_name,\
-                                         first_name, row_to_append,\
-                                         final_result, find_match)
-
-            # cycle through Adams/Williams
-            find_match = go_through_list(adams_williams, last_name,\
-                                         first_name, row_to_append,\
-                                         final_result, find_match)
-
-            # cycle through Council
-            find_match = go_through_list(council, last_name,\
-                                         first_name, row_to_append,\
-                                         final_result, find_match)
-
-            # cycle through State Reps
-            find_match = go_through_list(state_rep, last_name,\
-                                         first_name, row_to_append,\
-                                         final_result, find_match)
-
-            # cycle through WAM
-            find_match = go_through_list(wam, last_name,\
-                                         first_name, row_to_append,\
-                                         final_result, find_match)
-
-        # print the county exec one too.
-        if find_match == True:
-            for cell in row_num_1:
-                row_to_append.append(cell.value)
-            copy_to_final(row_to_append, final_result)
-            row_to_append = []
-            print("Copied Stenger/Mantovani")
-
-    file1 = file1.save(input("What would you like to name the save file?: "))
-
-
-# function to copy row onto final_result
-def copy_to_final(row_to_append, final_result):
-    index = 1
-    final_row = final_result.max_row + 1
-
-    for i in row_to_append:
-        if index < 19:
-            final_result.cell(row=final_row, column=index).value = i
-            index += 1
-
-
-# function to handle sifting through a list
-def go_through_list(sheet_to_go_through, last_name, first_name, row_to_append,\
-                    final_result, find_match):
-    for row_num in sheet_to_go_through.rows:
-        if row_num[5].value == last_name and \
-           row_num[6].value == first_name:
-            for cell in row_num:
-                row_to_append.append(cell.value)
-            copy_to_final(row_to_append, final_result)
-            row_to_append = []
-            find_match = True
-    return find_match
-'''
