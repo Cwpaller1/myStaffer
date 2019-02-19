@@ -10,6 +10,8 @@ from tkinter import ttk             # for modern Gui widgets
 from tkinter import filedialog      # for file chooser
 import shelve                       # to save our database
 import re                           # for regular expressions
+from tqdm import tqdm, trange
+from time import sleep
 
 # global variables and import shelve data
 file_name = ''
@@ -155,14 +157,23 @@ class ChooseFile(ttk.Frame):
             grid(row=0, column=0, padx=5, pady=10)
         ttk.Label(self, text='File name: ').grid(row=0, column=1)
 
+        self.status = StringVar()
+        status_frame = StatusBar(self)
+        status_frame.grid(row=2, columnspan=5, sticky='sew')
+        status_frame.grid_columnconfigure(0, weight=1)
+
+        self.grid(row=2,)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
     def open_dialog_box(self, controller):
         global file_name
         file_name = filedialog.askopenfilename()
         ttk.Label(self, text=file_name).grid(row=0, column=2)
-        ttk.Button(self, text="Import File Contents", command=import_file).\
-            grid(row=1, columnspan=2, pady=10)
+        ttk.Button(self, text="Import File Contents", command=lambda: [import_file(), self.status.set("Import Complete!")]).\
+            grid(row=1, columnspan=2, pady=10, sticky='s')
         ttk.Button(self, text="Back to Home Page", command=lambda: controller.show_frame(StartPage)).\
-            grid(row=1, column=2)
+            grid(row=1, column=2, sticky='s')
 
 
 # create SearchPage
@@ -516,7 +527,6 @@ def import_file():
         new_person = Person()
         new_person.take_via_excel(row)
         list_of_people.append(new_person)
-
 
 # function that searches list of people and returns a person
 def search_list(person_to_find):
