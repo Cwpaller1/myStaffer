@@ -8,7 +8,7 @@ ChooseFile Page
 #2: File Page is taking in the first row which is the column headers...that needs to stop. 
 
 
-EditPerson Page
+EditPerson Page (Property of Cory)
 #1: Change title of page to EditPerson
 
 #2: When a Result Button is pressed, have the SearchPage create a new instance of EditButton. 
