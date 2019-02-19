@@ -7,6 +7,7 @@ ChooseFile Page
 
 #2: File Page is taking in the first row which is the column headers...that needs to stop. 
 
+
 EditPerson Page
 #1: Change title of page to EditPerson
 
@@ -20,11 +21,13 @@ EditPerson Page
 
 #4: When the 'submit edit' button is pressed, change the variables in the person object.
 
+
 ***NEW***
 CampaignFinance Page
 #1: Create a new page called 'Campaign Finance'. Add it to StartPage.
 
 #2: CampaignFinance Page is going to have two options: 'Add New Contribution' and 'Add New Expenditure'
+
 
 AddNewContribution Page
 #1: Create a new page called 'Add New Contribution' and add it to CampaignFinance Page
@@ -38,6 +41,7 @@ AddNewContribution Page
 #5: Add a Contributions list variable into our Person object. 
 
 #6: Take that Contribution and add it into the right Contributor's object in list_of_people. 
+
 
 AddNewExpenditure Page
 #1: Create a new page called 'AddNewExpenditure' and add it to the CampaignFinance Page
