@@ -183,7 +183,7 @@ class ChooseFile(ttk.Frame):
             new_person = Person()
             new_person.take_via_excel(row)
             list_of_people.append(new_person)
-            self.status.set("List imported!")
+        self.status.set("List imported!")
 
 # create SearchPage
 class SearchPage(ttk.Frame):
