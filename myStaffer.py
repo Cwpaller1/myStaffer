@@ -170,7 +170,7 @@ class ChooseFile(ttk.Frame):
         global file_name
         file_name = filedialog.askopenfilename()
         ttk.Label(self, text=file_name).grid(row=0, column=2)
-        ttk.Button(self, text="Import File Contents", command=lambda: self.import_file()).\
+        ttk.Button(self, text="Import File Contents", command=self.import_file()).\
             grid(row=1, columnspan=2, pady=10, sticky='s')
         ttk.Button(self, text="Back to Home Page", command=lambda: controller.show_frame(StartPage)).\
             grid(row=1, column=2, sticky='s')
