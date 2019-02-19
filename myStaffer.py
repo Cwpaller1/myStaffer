@@ -504,16 +504,6 @@ class EditPage(ttk.Frame):
 '''
 
 
-# function that takes a file and creates Person objects out of each row and appends them to the list of people.
-def import_file():
-    global list_of_people
-    file1 = load_workbook(file_name)
-    for row in file1.active.rows:
-        new_person = Person()
-        new_person.take_via_excel(row)
-        list_of_people.append(new_person)
-
-
 # function that searches list of people and returns a person
 def search_list(person_to_find):
     global search_results
