@@ -39,7 +39,6 @@ class MyStafferApp(Tk):
         # create variables for call time functions
         self.call_time_frames = []
         self.call_time_index = 0
-
         for F in (StartPage, ChooseFile, Staffer, Candidate, SearchPage, AddNewPerson):
             # create page
             frame = F(self.container, self)
@@ -110,6 +109,7 @@ class MyStafferApp(Tk):
         frame.grid_rowconfigure(0, weight=1)
         frame.grid_columnconfigure(0, weight=1)
 
+ create_calltime
     def create_call_time_frames(self):
         if len(self.call_time_frames) == 0:
             for person in list_of_people:
@@ -136,7 +136,6 @@ class MyStafferApp(Tk):
         if self.call_time_index != 0:
             self.call_time_index -= 1
             self.show_call_time_frame(self.call_time_index)
-
 
 '''Window Pages
 '''
@@ -391,6 +390,7 @@ class SearchPage(ttk.Frame):
         # delete all of the buttons
         for x in self.button_list:
             x.destroy()
+
 
         # delete all edit buttons
         for x in self.edit_button_list:
@@ -696,6 +696,20 @@ class CallTimePage(ttk.Frame):
         master_frame.grid(row=0, column=0)
         master_frame.grid_columnconfigure(0, weight=1)
         master_frame.grid_rowconfigure(0, weight=1)
+
+    def submit_edits(self):
+        self.person.first = self.first_entry.get()
+        self.person.last = self.last_entry.get()
+        self.person.address = self.address_entry.get()
+        self.person.city = self.city_entry.get()
+        self.person.state = self.state_entry.get()
+        self.person.zip_code = self.zip_code_entry.get()
+        self.person.cell = self.cell_entry.get()
+        self.person.home = self.home_entry.get()
+        self.person.work = self.work_entry.get()
+        self.person.email = self.email_entry.get()
+        self.controller.create_new_search_page()
+        self.controller.show_frame(SearchPage)
 
 
 '''Global Functions
