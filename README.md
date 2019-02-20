@@ -1,22 +1,22 @@
 # myStaffer
 myStaffer project start. 
 
-TODO's
-ChooseFile Page
+***ChooseFile Page
 
 #1: File Page needs to detect column headers of the file and import based on that. 
 
 #2: File Page is taking in the first row which is the column headers...that needs to stop. 
 
 ***NEW***
-CampaignFinance Page
+
+***CampaignFinance Page****
 
 #1: Create a new page called 'Campaign Finance'. Add it to StartPage.
 
 #2: CampaignFinance Page is going to have two options: 'Add New Contribution' and 'Add New Expenditure'
 
 
-AddNewContribution Page
+***AddNewContribution Page
 
 #1: Create a new page called 'Add New Contribution' and add it to CampaignFinance Page
 
@@ -31,7 +31,7 @@ AddNewContribution Page
 #6: Take that Contribution and add it into the right Contributor's object in list_of_people. 
 
 
-AddNewExpenditure Page
+***AddNewExpenditure Page
 
 #1: Create a new page called 'AddNewExpenditure' and add it to the CampaignFinance Page
 
