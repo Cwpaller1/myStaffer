@@ -150,14 +150,34 @@ class ChooseFile(ttk.Frame):
             grid(row=0, column=0, padx=5, pady=10)
         ttk.Label(self, text='File name: ').grid(row=0, column=1)
 
+        self.status = StringVar()
+        status_frame = StatusBar(self)
+        status_frame.grid(row=2, columnspan=5, sticky='sew')
+        status_frame.grid_columnconfigure(0, weight=1)
+
+        self.grid(row=2, )
+
+    self.grid_rowconfigure(0, weight=1)
+    self.grid_columnconfigure(0, weight=1)
+
     def open_dialog_box(self, controller):
         global file_name
         file_name = filedialog.askopenfilename()
         ttk.Label(self, text=file_name).grid(row=0, column=2)
-        ttk.Button(self, text="Import File Contents", command=import_file).\
-            grid(row=1, columnspan=2, pady=10)
+        ttk.Button(self, text="Import File Contents", command=self.import_file).\
+            grid(row=1, columnspan=2, pady=10, sticky='s')
         ttk.Button(self, text="Back to Home Page", command=lambda: controller.show_frame(StartPage)).\
             grid(row=1, column=2)
+
+    # function that takes a file and creates Person objects out of each row and appends them to the list of people.
+    def import_file(self):
+        global list_of_people
+        file1 = load_workbook(file_name)
+        for row in file1.active.rows:
+            new_person = Person()
+            new_person.take_via_excel(row)
+            list_of_people.append(new_person)
+        self.status.set("List imported!")
 
 
 # create SearchPage
@@ -502,16 +522,6 @@ class EditPage(ttk.Frame):
 
 '''Global Functions
 '''
-
-
-# function that takes a file and creates Person objects out of each row and appends them to the list of people.
-def import_file():
-    global list_of_people
-    file1 = load_workbook(file_name)
-    for row in file1.active.rows:
-        new_person = Person()
-        new_person.take_via_excel(row)
-        list_of_people.append(new_person)
 
 
 # function that searches list of people and returns a person
