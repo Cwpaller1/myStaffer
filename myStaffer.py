@@ -157,8 +157,8 @@ class ChooseFile(ttk.Frame):
 
         self.grid(row=2, )
 
-    self.grid_rowconfigure(0, weight=1)
-    self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
     def open_dialog_box(self, controller):
         global file_name
