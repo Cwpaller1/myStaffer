@@ -26,19 +26,19 @@ class MyStafferApp(Tk):
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
         Tk.wm_title(self, 'myStaffer Program')
-        container = ttk.Frame(self)
+        self.container = ttk.Frame(self)
 
         # pack container into Tk
-        container.pack(side='top', fill=BOTH, expand=TRUE)
-        container.grid_columnconfigure(0, weight=1)
-        container.grid_rowconfigure(0, weight=1)
+        self.container.pack(side='top', fill=BOTH, expand=TRUE)
+        self.container.grid_columnconfigure(0, weight=1)
+        self.container.grid_rowconfigure(0, weight=1)
 
         # create dictionary that hold our frames
         self.Frames = {}
 
-        for F in (StartPage, ChooseFile, Staffer, Candidate, SearchPage, AddNewPerson, EditPage):
+        for F in (StartPage, ChooseFile, Staffer, Candidate, SearchPage, AddNewPerson):
             # create page
-            frame = F(container, self)
+            frame = F(self.container, self)
             # add our new frame into the dictionary of frames
             self.Frames[str(F)] = frame
 
@@ -86,6 +86,25 @@ class MyStafferApp(Tk):
         frame = self.Frames[str(controller)]
         # raise frame to front using built in Tk method
         frame.tkraise()
+
+    def create_edit_frame(self, person):
+        if 'EditPerson' in self.Frames:
+            del self.Frames[str(EditPerson)]
+        frame = EditPerson(self.container, self, person)
+        self.Frames[str(EditPerson)] = frame
+        frame.grid(row=0, column=0, sticky='nsew')
+        frame.grid_rowconfigure(0, weight=1)
+        frame.grid_columnconfigure(0, weight=1)
+
+    def create_new_search_page(self):
+        if 'SearchPage' in self.Frames:
+            del self.Frames[str(SearchPage)]
+        frame = SearchPage(self.container, self)
+        frame.status.set('Successfully Added Your Edits')
+        self.Frames[str(SearchPage)] = frame
+        frame.grid(row=0, column=0, sticky='nsew')
+        frame.grid_rowconfigure(0, weight=1)
+        frame.grid_columnconfigure(0, weight=1)
 
 
 '''Window Pages
@@ -184,6 +203,7 @@ class ChooseFile(ttk.Frame):
 class SearchPage(ttk.Frame):
     def __init__(self, parent, controller):
         ttk.Frame.__init__(self, parent)
+        self.controller = controller
 
         # define my StringVariables and page variables
         self.first_strvar = StringVar()
@@ -339,6 +359,12 @@ class SearchPage(ttk.Frame):
         for x in self.button_list:
             x.destroy()
 
+    def add_edit_button(self, person):
+        edit_button = EditButton(self.frame3, person)
+        edit_button.config(command=lambda: edit_button.edit_button_push(self.controller))
+        edit_button.grid(row=11, column=0, columnspan=2, sticky='ew')
+        self.button_list.append(edit_button)
+
 
 class AddNewPerson(ttk.Frame):
     def __init__(self, parent, controller):
@@ -455,10 +481,12 @@ class AddNewPerson(ttk.Frame):
             self.status.set('Error. Missing First or Last Name. Try again.')
 
 
-class EditPage(ttk.Frame):
-    def __init__(self, parent, controller):
+class EditPerson(ttk.Frame):
+    def __init__(self, parent, controller, person):
         ttk.Frame.__init__(self, parent)
 
+        self.person = person
+        self.controller = controller
         # master frame for page
         master_frame = ttk.Frame(self)
 
@@ -482,28 +510,38 @@ class EditPage(ttk.Frame):
         ttk.Label(frame2, text='Work: ').grid(row=9, column=0, sticky='w')
         ttk.Label(frame2, text='Email: ').grid(row=10, column=0, sticky='w')
         # user entry
-        self.first_entry = ttk.Entry(frame2)
+        self.first_entry = ttk.Entry(frame2)                         # first name
+        self.first_entry.insert(END, person.first)
         self.first_entry.grid(row=1, column=1, sticky='e')
-        self.last_entry = ttk.Entry(frame2)
+        self.last_entry = ttk.Entry(frame2)                          # last name
+        self.last_entry.insert(END, person.last)
         self.last_entry.grid(row=2, column=1, sticky='e')
-        self.address_entry = ttk.Entry(frame2)
+        self.address_entry = ttk.Entry(frame2)                       # address
+        self.address_entry.insert(END, person.address)
         self.address_entry.grid(row=3, column=1, sticky='e')
-        self.city_entry = ttk.Entry(frame2)
+        self.city_entry = ttk.Entry(frame2)                          # city
+        self.city_entry.insert(END, person.city)
         self.city_entry.grid(row=4, column=1, sticky='e')
-        self.state_entry = ttk.Entry(frame2)
+        self.state_entry = ttk.Entry(frame2)                         # state
+        self.state_entry.insert(END, person.state)
         self.state_entry.grid(row=5, column=1, sticky='e')
-        self.zip_code_entry = ttk.Entry(frame2)
+        self.zip_code_entry = ttk.Entry(frame2)                      # zip_code
+        self.zip_code_entry.insert(END, person.zip_code)
         self.zip_code_entry.grid(row=6, column=1, sticky='e')
-        self.cell_entry = ttk.Entry(frame2)
+        self.cell_entry = ttk.Entry(frame2)                          # cell
+        self.cell_entry.insert(END, person.cell)
         self.cell_entry.grid(row=7, column=1, sticky='e')
-        self.home_entry = ttk.Entry(frame2)
+        self.home_entry = ttk.Entry(frame2)                          # home
+        self.home_entry.insert(END, person.home)
         self.home_entry.grid(row=8, column=1, sticky='e')
-        self.work_entry = ttk.Entry(frame2)
+        self.work_entry = ttk.Entry(frame2)                          # work
+        self.work_entry.insert(END, person.work)
         self.work_entry.grid(row=9, column=1, sticky='e')
-        self.email_entry = ttk.Entry(frame2)
+        self.email_entry = ttk.Entry(frame2)                         # email
+        self.email_entry.insert(END, person.email)
         self.email_entry.grid(row=10, column=1, sticky='e')
         # submit button
-        self.submit_button = ttk.Button(frame2, text='Submit Edits')
+        self.submit_button = ttk.Button(frame2, text='Submit Edits', command=self.submit_edits)
         self.submit_button.grid(row=11, column=0, columnspan=2, sticky='ew')
         # pack body frame
         frame2.grid(row=1, column=0)
@@ -518,6 +556,20 @@ class EditPage(ttk.Frame):
         master_frame.grid(row=0, column=0)
         master_frame.grid_rowconfigure(0, weight=1)
         master_frame.grid_columnconfigure(0, weight=1)
+
+    def submit_edits(self):
+        self.person.first = self.first_entry.get()
+        self.person.last = self.last_entry.get()
+        self.person.address = self.address_entry.get()
+        self.person.city = self.city_entry.get()
+        self.person.state = self.state_entry.get()
+        self.person.zip_code = self.zip_code_entry.get()
+        self.person.cell = self.cell_entry.get()
+        self.person.home = self.home_entry.get()
+        self.person.work = self.work_entry.get()
+        self.person.email = self.email_entry.get()
+        self.controller.create_new_search_page()
+        self.controller.show_frame(SearchPage)
 
 
 '''Global Functions
@@ -617,6 +669,7 @@ class ResultButton(ttk.Button):
         self.controller.work_strvar.set(self.person.work)
         self.controller.home_strvar.set(self.person.home)
         self.controller.email_strvar.set(self.person.email)
+        self.controller.add_edit_button(self.person)
 
 
 class StatusBar(ttk.Frame):
@@ -632,8 +685,9 @@ class EditButton(ttk.Button):
         self.config(text="Edit Person...")
         self.person_obj = person
 
-    def button_push(self):
-        pass
+    def edit_button_push(self, controller):
+        controller.create_edit_frame(self.person_obj)
+        controller.show_frame(EditPerson)
 
 
 def quit_save():
