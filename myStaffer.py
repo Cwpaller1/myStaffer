@@ -167,7 +167,7 @@ class ChooseFile(ttk.Frame):
         ttk.Button(self, text="Import File Contents", command=self.import_file).\
             grid(row=1, columnspan=2, pady=10, sticky='s')
         ttk.Button(self, text="Back to Home Page", command=lambda: controller.show_frame(StartPage)).\
-            grid(row=1, column=2)
+            grid(row=1, column=2, sticky='s')
 
     # function that takes a file and creates Person objects out of each row and appends them to the list of people.
     def import_file(self):
