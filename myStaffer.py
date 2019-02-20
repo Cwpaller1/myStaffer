@@ -1,23 +1,20 @@
-'''This is the start of the myStaffer project.
-Created by Cory Paller.'''
+"""This is the start of the myStaffer project.
+Created by Cory Paller."""
 
 # shebang line
-#! usr/bin/env Python3.
+# ! usr/bin/env Python3.
 
 from openpyxl import *              # for excel files
 from tkinter import *               # for Gui
 from tkinter import ttk             # for modern Gui widgets
 from tkinter import filedialog      # for file chooser
 import shelve                       # to save our database
-import re                           # for regular expressions
-from tqdm import tqdm, trange
-from time import sleep
 
 # global variables and import shelve data
 file_name = ''
 list_of_people = []
 search_results = []
-edit_person = []
+id_num = 1000000000
 
 
 '''Main Tk Window
@@ -30,9 +27,6 @@ class MyStafferApp(Tk):
         Tk.__init__(self, *args, **kwargs)
         Tk.wm_title(self, 'myStaffer Program')
         container = ttk.Frame(self)
-
-        global edit_person
-        edit_person.append(Person())
 
         # pack container into Tk
         container.pack(side='top', fill=BOTH, expand=TRUE)
@@ -105,8 +99,7 @@ class StartPage(ttk.Frame):
         # add a widget that welcomes the user.
         frame1 = ttk.Frame(self)
         ttk.Label(frame1, text="Welcome to myStaffer").grid(sticky='ew')
-        ttk.Button(frame1, text="Candidate", command=lambda: controller.show_frame(Candidate)).grid(row=1,
-                                                                                                     sticky='ew')
+        ttk.Button(frame1, text="Candidate", command=lambda: controller.show_frame(Candidate)).grid(row=1, sticky='ew')
         ttk.Button(frame1, text="Staffer", command=lambda: controller.show_frame(Staffer)).grid(row=2, sticky='ew')
         ttk.Button(frame1, text="Upload New File", command=lambda: controller.show_frame(ChooseFile)).\
             grid(row=3, sticky='ew')
@@ -142,7 +135,7 @@ class Candidate(ttk.Frame):
                                                                                                   sticky='ew')
         ttk.Button(frame1, text='Call Time').grid(row=1, column=0, sticky='ew')
         ttk.Button(frame1, text='Reports').grid(row=2, column=0, sticky='ew')
-        ttk.Button(frame1, text='Back to Home Page', command=lambda:controller.show_frame(StartPage)).\
+        ttk.Button(frame1, text='Back to Home Page', command=lambda: controller.show_frame(StartPage)).\
             grid(row=3, column=0, sticky='ew')
         frame1.grid(row=0, column=0)
         frame1.grid_rowconfigure(0, weight=1)
@@ -162,15 +155,16 @@ class ChooseFile(ttk.Frame):
         status_frame.grid(row=2, columnspan=5, sticky='sew')
         status_frame.grid_columnconfigure(0, weight=1)
 
-        self.grid(row=2,)
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
+        self.grid(row=2, )
+
+    self.grid_rowconfigure(0, weight=1)
+    self.grid_columnconfigure(0, weight=1)
 
     def open_dialog_box(self, controller):
         global file_name
         file_name = filedialog.askopenfilename()
         ttk.Label(self, text=file_name).grid(row=0, column=2)
-        ttk.Button(self, text="Import File Contents", command=lambda: self.import_file()).\
+        ttk.Button(self, text="Import File Contents", command=self.import_file).\
             grid(row=1, columnspan=2, pady=10, sticky='s')
         ttk.Button(self, text="Back to Home Page", command=lambda: controller.show_frame(StartPage)).\
             grid(row=1, column=2, sticky='s')
@@ -184,6 +178,7 @@ class ChooseFile(ttk.Frame):
             new_person.take_via_excel(row)
             list_of_people.append(new_person)
         self.status.set("List imported!")
+
 
 # create SearchPage
 class SearchPage(ttk.Frame):
@@ -487,25 +482,25 @@ class EditPage(ttk.Frame):
         ttk.Label(frame2, text='Work: ').grid(row=9, column=0, sticky='w')
         ttk.Label(frame2, text='Email: ').grid(row=10, column=0, sticky='w')
         # user entry
-        self.first_entry = ttk.Entry(frame2, text=edit_person[0].first)
+        self.first_entry = ttk.Entry(frame2)
         self.first_entry.grid(row=1, column=1, sticky='e')
-        self.last_entry = ttk.Entry(frame2, text=edit_person[0].last)
+        self.last_entry = ttk.Entry(frame2)
         self.last_entry.grid(row=2, column=1, sticky='e')
-        self.address_entry = ttk.Entry(frame2, text=edit_person[0].address)
+        self.address_entry = ttk.Entry(frame2)
         self.address_entry.grid(row=3, column=1, sticky='e')
-        self.city_entry = ttk.Entry(frame2, text=edit_person[0].city)
+        self.city_entry = ttk.Entry(frame2)
         self.city_entry.grid(row=4, column=1, sticky='e')
-        self.state_entry = ttk.Entry(frame2, text=edit_person[0].state)
+        self.state_entry = ttk.Entry(frame2)
         self.state_entry.grid(row=5, column=1, sticky='e')
-        self.zip_code_entry = ttk.Entry(frame2, text=edit_person[0].zip_code)
+        self.zip_code_entry = ttk.Entry(frame2)
         self.zip_code_entry.grid(row=6, column=1, sticky='e')
-        self.cell_entry = ttk.Entry(frame2, text=edit_person[0].cell)
+        self.cell_entry = ttk.Entry(frame2)
         self.cell_entry.grid(row=7, column=1, sticky='e')
-        self.home_entry = ttk.Entry(frame2, text=edit_person[0].home)
+        self.home_entry = ttk.Entry(frame2)
         self.home_entry.grid(row=8, column=1, sticky='e')
-        self.work_entry = ttk.Entry(frame2, text=edit_person[0].work)
+        self.work_entry = ttk.Entry(frame2)
         self.work_entry.grid(row=9, column=1, sticky='e')
-        self.email_entry = ttk.Entry(frame2, text=edit_person[0].email)
+        self.email_entry = ttk.Entry(frame2)
         self.email_entry.grid(row=10, column=1, sticky='e')
         # submit button
         self.submit_button = ttk.Button(frame2, text='Submit Edits')
@@ -524,8 +519,10 @@ class EditPage(ttk.Frame):
         master_frame.grid_rowconfigure(0, weight=1)
         master_frame.grid_columnconfigure(0, weight=1)
 
+
 '''Global Functions
 '''
+
 
 # function that searches list of people and returns a person
 def search_list(person_to_find):
@@ -552,6 +549,12 @@ def search_list(person_to_find):
 # Class that creates a Person object
 class Person(object):
     def __init__(self):
+        # set unique object id
+        global id_num
+        self.id = id_num
+        id_num += 1
+
+        # set object initialization variables.
         self.first = ''
         self.last = ''
         self.address = ''
@@ -614,14 +617,6 @@ class ResultButton(ttk.Button):
         self.controller.work_strvar.set(self.person.work)
         self.controller.home_strvar.set(self.person.home)
         self.controller.email_strvar.set(self.person.email)
-        self.controller.edit_button = ttk.Button(self.controller.frame3, text='Edit', command=self.edit_button)
-        self.controller.edit_button.grid(row=11, column=0, rowspan=2, sticky='ew')
-
-    def edit_button(self):
-        global edit_person
-        edit_person.append(self.person)
-        self.controller.self.controller.showframe(EditPage)
-        self.controller.edit_button.destroy()
 
 
 class StatusBar(ttk.Frame):
@@ -629,6 +624,16 @@ class StatusBar(ttk.Frame):
         ttk.Frame.__init__(self, parent)
         self.config(relief=SUNKEN, borderwidth=3)
         self.label1 = ttk.Label(self, textvariable=parent.status).pack(side='left')
+
+
+class EditButton(ttk.Button):
+    def __init__(self, parent, person):
+        ttk.Button.__init__(self, parent)
+        self.config(text="Edit Person...")
+        self.person_obj = person
+
+    def button_push(self):
+        pass
 
 
 def quit_save():
