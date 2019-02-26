@@ -109,7 +109,6 @@ class MyStafferApp(Tk):
         frame.grid_rowconfigure(0, weight=1)
         frame.grid_columnconfigure(0, weight=1)
 
- create_calltime
     def create_call_time_frames(self):
         if len(self.call_time_frames) == 0:
             for person in list_of_people:
@@ -223,11 +222,19 @@ class ChooseFile(ttk.Frame):
     def import_file(self):
         global list_of_people
         file1 = load_workbook(file_name)
+        x = 0
         for row in file1.active.rows:
-            new_person = Person()
-            new_person.take_via_excel(row)
-            list_of_people.append(new_person)
+            if x == 0:
+                self.find_column_headers(row)
+                x += 1
+            else:
+                new_person = Person()
+                new_person.take_via_excel(row)
+                list_of_people.append(new_person)
         self.status.set("List imported!")
+
+    def find_column_headers(self, row):
+        return True
 
 
 # create SearchPage
